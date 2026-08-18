@@ -1,0 +1,40 @@
+# Secrets — never commit keys, OAuth clients, or tokens
+.env
+.env.*
+!.env.example
+!**/.env.example
+client_secret*.json
+oauth_client.json
+.youtube-token.json
+
+# Dependencies
+node_modules/
+
+# Generated pipeline artifacts
+output/
+**/output/
+
+# Brand / generated media (not source)
+Images/
+**/Images/
+*.mp4
+*.mov
+*.wav
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.gif
+
+# Caption fonts are source-adjacent pipeline assets
+!assets/fonts/*.ttf
+!**/assets/fonts/*.ttf
+
+# Local experiments
+notebooks/
+
+# OS / editor
+.DS_Store
+**/.DS_Store
+*.log
+.claude/settings.local.json

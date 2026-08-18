@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Founder Finance — Studio</title>
+<style>
+  :root {
+    --bg:#0f1117; --panel:#171a23; --card:#1d2130; --line:#2a2f42;
+    --text:#e8eaf6; --muted:#8b92b8; --accent:#7c8cf8; --accent2:#5d6cf0;
+    --green:#4ade80; --red:#f87171; --amber:#fbbf24; --blue:#60a5fa;
+    --radius:12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Inter",sans-serif;font-size:14px;line-height:1.55}
+  .wrap{max-width:880px;margin:0 auto;padding:32px 20px 80px}
+  header{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  header h1{font-size:22px;font-weight:700;letter-spacing:-.4px}
+  .sub{color:var(--muted);margin-bottom:26px;font-size:13px}
+  .tag{font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px;background:#1e1b4b;color:var(--accent)}
+
+  .step{position:relative;padding-left:46px;margin-bottom:14px}
+  .step::before{content:attr(data-n);position:absolute;left:0;top:0;width:30px;height:30px;border-radius:50%;
+    background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:700;color:var(--muted)}
+  .step.done::before{background:#14532d;border-color:#14532d;color:var(--green);content:"✓"}
+  .step.active::before{border-color:var(--accent);color:var(--accent)}
+  .step:not(:last-child)::after{content:"";position:absolute;left:15px;top:30px;bottom:-14px;width:1px;background:var(--line)}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px}
+  .card.lock{opacity:.5;pointer-events:none}
+  .card h2{font-size:15px;font-weight:650;margin-bottom:3px;display:flex;align-items:center;gap:8px}
+  .card p.desc{color:var(--muted);font-size:12.5px;margin-bottom:12px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+  button{font:inherit;font-weight:600;font-size:13px;border:none;border-radius:8px;padding:9px 16px;cursor:pointer;
+    background:var(--accent2);color:#fff;transition:.15s}
+  button:hover{background:var(--accent)}
+  button:disabled{background:#2a2f42;color:#5a6080;cursor:not-allowed}
+  button.ghost{background:transparent;border:1px solid var(--line);color:var(--text)}
+  button.ghost:hover{border-color:var(--accent);background:#1e1b4b22}
+  button.sm{padding:6px 11px;font-size:12px}
+  button.danger{background:#7f1d1d}button.danger:hover{background:#b91c1c}
+
+  .badge{font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px;background:#2a2f42;color:var(--muted)}
+  .badge.run{background:#42330a;color:var(--amber)} .badge.ok{background:#14532d;color:var(--green)}
+  .badge.err{background:#450a0a;color:var(--red)} .badge.idle{background:#2a2f42;color:var(--muted)}
+
+  pre.log{background:#0b0d13;border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-top:11px;
+    font-family:"SF Mono",monospace;font-size:11px;color:#aab2da;max-height:200px;overflow:auto;white-space:pre-wrap;display:none}
+  pre.log.show{display:block}
+  .out{margin-top:12px;display:none}.out.show{display:block}
+  .doc{background:#0b0d13;border:1px solid var(--line);border-radius:8px;padding:12px 14px;font-size:12.5px;
+    max-height:340px;overflow:auto;white-space:pre-wrap;font-family:"SF Mono",monospace;color:#c3c9ec}
+
+  .topic{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:10px;cursor:pointer;transition:.15s}
+  .topic:hover{border-color:var(--accent)}
+  .topic.sel{border-color:var(--accent);background:#1e1b4b33}
+  .topic h3{font-size:13.5px;margin-bottom:3px}
+  .topic .meta{font-size:11px;color:var(--muted);margin-bottom:6px}
+  .topic .hook{font-size:12px;color:#c3c9ec;font-style:italic}
+
+  .pill{font-size:10.5px;padding:1px 8px;border-radius:20px;background:#1e293b;color:var(--blue);font-weight:600}
+  video{width:100%;border-radius:8px;margin-top:12px;background:#000}
+  img.thumb{max-width:320px;border-radius:8px;margin-top:10px;border:1px solid var(--line)}
+  select{font:inherit;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+  a{color:var(--accent)}
+  .hint{font-size:11.5px;color:var(--muted);margin-top:8px}
+  .count{font-weight:700;color:var(--text)}
+  input[type=file]{font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Founder Finance</h1><span class="tag">Studio</span>
+  </header>
+  <div class="sub">Click through the pipeline — research to published video. Each step lights up when the one before it is ready.</div>
+
+  <!-- 1 RESEARCH -->
+  <div class="step" data-n="1" id="step-research">
+    <div class="card">
+      <h2>Start a new video <span class="badge idle" id="b-research">idle</span></h2>
+      <p class="desc">Claude pulls fresh finance news, your competitors' recent winners, and rising trends, then proposes 3 topic ideas engineered for your audience.</p>
+      <div class="row">
+        <button id="run-research" onclick="runResearch()">Research &amp; find topics</button>
+        <span class="hint" id="research-hint"></span>
+      </div>
+      <pre class="log" id="log-research"></pre>
+    </div>
+  </div>
+
+  <!-- 2 TOPIC -->
+  <div class="step" data-n="2" id="step-topics">
+    <div class="card lock" id="card-topics">
+      <h2>Pick your topic <span class="badge idle" id="b-topics">waiting</span></h2>
+      <p class="desc">Choose the idea to produce. Writing the script resets any previous video's files for a clean slate.</p>
+      <div id="topic-list"></div>
+      <div class="row" style="margin-top:12px">
+        <button id="run-script" disabled onclick="runScript()">Write script for selected topic</button>
+      </div>
+      <pre class="log" id="log-script"></pre>
+    </div>
+  </div>
+
+  <!-- 3 SCRIPT -->
+  <div class="step" data-n="3" id="step-script">
+    <div class="card lock" id="card-script">
+      <h2>Script <span class="badge idle" id="b-script">waiting</span></h2>
+      <p class="desc">The full voiceover script plus the scene-by-scene storyboard.</p>
+      <div class="row"><button class="ghost sm" onclick="toggleDoc('script')">View script</button></div>
+      <div class="out" id="out-script"><div class="doc" id="doc-script"></div></div>
+    </div>
+  </div>
+
+  <!-- 4 IMAGES -->
+  <div class="step" data-n="4" id="step-images">
+    <div class="card lock" id="card-images">
+      <h2>Generate images <span class="badge idle" id="b-images">waiting</span><span class="badge idle" id="b-image-clean">not cleaned</span></h2>
+      <p class="desc">Open the image-prompt file, generate each frame on Google Flow / Nano Banana 2, and save them into <code>Images/zapi-img</code> named by scene number (01, 02, …). Then refresh the count.</p>
+      <div class="row">
+        <button class="ghost sm" onclick="toggleDoc('prompts')">View image prompts</button>
+        <button class="ghost sm" id="run-clean-images" onclick="runCleanImages()">Remove image watermark</button>
+        <button class="ghost sm" onclick="clearImages()">Clear images folder</button>
+        <button class="ghost sm" onclick="refresh()">Refresh count</button>
+        <span class="hint"><span class="count" id="img-count">0</span> images detected</span>
+        <span class="hint" id="image-clean-hint"></span>
+      </div>
+      <pre class="log" id="log-clean-images"></pre>
+      <div class="out" id="out-prompts"><div class="doc" id="doc-prompts"></div></div>
+    </div>
+  </div>
+
+  <!-- 5 VIDEO -->
+  <div class="step" data-n="5" id="step-video">
+    <div class="card lock" id="card-video">
+      <h2>Make the video <span class="badge idle" id="b-video">waiting</span></h2>
+      <p class="desc">Synthesizes the voiceover (Kokoro), animates each image with Ken Burns + captions, appends your outro, and stitches the final cut. Takes a few minutes the first time.</p>
+      <div class="row">
+        <button id="run-video" onclick="runVideo()">Generate video</button>
+        <span class="hint" id="video-hint"></span>
+      </div>
+      <pre class="log" id="log-video"></pre>
+      <div class="out" id="out-video"></div>
+    </div>
+  </div>
+
+  <!-- 6 METADATA -->
+  <div class="step" data-n="6" id="step-metadata">
+    <div class="card lock" id="card-metadata">
+      <h2>Metadata &amp; thumbnail prompts <span class="badge idle" id="b-metadata">waiting</span></h2>
+      <p class="desc">Claude writes the SEO title/description/tags/chapters and 3 Gemini-ready thumbnail prompts.</p>
+      <div class="row">
+        <button id="run-metadata" onclick="runMetadata()">Generate metadata</button>
+        <button class="ghost sm" onclick="toggleDoc('metadata')">View metadata</button>
+        <button class="ghost sm" onclick="toggleDoc('thumbs')">View thumbnail prompts</button>
+      </div>
+      <pre class="log" id="log-metadata"></pre>
+      <div class="out" id="out-metadata"><div class="doc" id="doc-metadata"></div></div>
+      <div class="out" id="out-thumbs"><div class="doc" id="doc-thumbs"></div></div>
+    </div>
+  </div>
+
+  <!-- 7 THUMBNAIL -->
+  <div class="step" data-n="7" id="step-thumb">
+    <div class="card lock" id="card-thumb">
+      <h2>Upload thumbnail <span class="badge idle" id="b-thumb">waiting</span></h2>
+      <p class="desc">Generate the thumbnail on Gemini using a prompt above, then upload the image here.</p>
+      <div class="row">
+        <input type="file" id="thumb-file" accept="image/*" />
+        <button class="sm" onclick="uploadThumb()">Upload thumbnail</button>
+      </div>
+      <div id="thumb-prev"></div>
+    </div>
+  </div>
+
+  <!-- 8 PUBLISH -->
+  <div class="step" data-n="8" id="step-publish">
+    <div class="card lock" id="card-publish">
+      <h2>Publish to YouTube <span class="badge idle" id="b-publish">waiting</span></h2>
+      <p class="desc">Uploads the video with the generated metadata + thumbnail. Defaults to private.</p>
+      <div class="row">
+        <select id="privacy">
+          <option value="private">Private</option>
+          <option value="unlisted">Unlisted</option>
+          <option value="public">Public</option>
+        </select>
+        <button id="run-upload" onclick="runUpload()">Upload to YouTube</button>
+        <span class="hint" id="auth-hint"></span>
+      </div>
+      <pre class="log" id="log-publish"></pre>
+      <div class="out" id="out-publish"></div>
+    </div>
+  </div>
+
+  <!-- FINISH -->
+  <div style="margin-top:26px;padding-top:22px;border-top:1px solid var(--line);display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <button class="danger" onclick="finish()">Finish &amp; clear for next video</button>
+    <span class="hint">Wipes this video's files (script, images, video, metadata, thumbnail) to free storage, keeps your login, and stops the UI.</span>
+  </div>
+  <div id="finished" style="display:none;margin-top:18px;font-size:15px">✓ Cleared. The studio has stopped — run <code>./scripts/ui.sh start</code> to begin the next video.</div>
+</div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+let state = {};
+let pickedRank = null;
+
+const setBadge = (id, kind, txt) => { const b=$("#"+id); b.className="badge "+kind; b.textContent=txt; };
+
+async function api(path, opts) { const r = await fetch(path, opts); return r.ok ? r.json() : Promise.reject(await r.text().catch(()=>r.status)); }
+
+// Poll a job, stream logs into logEl, run onDone when finished.
+async function poll(jobId, logEl, badgeId, onDone) {
+  logEl.classList.add("show");
+  setBadge(badgeId, "run", "running…");
+  const tick = async () => {
+    let j; try { j = await api("/api/job/"+jobId); } catch { return; }
+    logEl.textContent = j.logs.trim(); logEl.scrollTop = logEl.scrollHeight;
+    if (j.status === "running") return setTimeout(tick, 1000);
+    if (j.status === "done") { setBadge(badgeId,"ok","done"); onDone && onDone(true); }
+    else { setBadge(badgeId,"err","error"); onDone && onDone(false); }
+    refresh();
+  };
+  tick();
+}
+
+// ── actions ──
+async function runResearch(){
+  $("#run-research").disabled = true;
+  const {jobId} = await api("/api/run/research",{method:"POST"});
+  poll(jobId, $("#log-research"), "b-research", ()=>{ $("#run-research").disabled=false; });
+}
+async function runScript(){
+  if(pickedRank==null) return;
+  $("#run-script").disabled = true;
+  const {jobId} = await api("/api/run/script",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({rank:pickedRank})});
+  poll(jobId, $("#log-script"), "b-topics", ()=>{ loadDoc("script"); });
+}
+async function runVideo(){
+  $("#run-video").disabled = true;
+  const {jobId} = await api("/api/run/video",{method:"POST"});
+  poll(jobId, $("#log-video"), "b-video", (ok)=>{ $("#run-video").disabled=false; if(ok) showVideo(); });
+}
+async function runCleanImages(){
+  $("#run-clean-images").disabled = true;
+  const {jobId} = await api("/api/run/clean-images",{method:"POST"});
+  poll(jobId, $("#log-clean-images"), "b-image-clean", ()=>{ $("#run-clean-images").disabled=false; });
+}
+async function runMetadata(){
+  $("#run-metadata").disabled = true;
+  const {jobId} = await api("/api/run/metadata",{method:"POST"});
+  poll(jobId, $("#log-metadata"), "b-metadata", ()=>{ $("#run-metadata").disabled=false; loadDoc("metadata"); loadDoc("thumbs"); });
+}
+async function runUpload(){
+  $("#run-upload").disabled = true;
+  const privacy = $("#privacy").value;
+  const {jobId} = await api("/api/run/upload",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({privacy})});
+  poll(jobId, $("#log-publish"), "b-publish", (ok)=>{ $("#run-upload").disabled=false; if(ok) showUploadUrl($("#log-publish").textContent); });
+}
+async function clearImages(){ await api("/api/images/clear",{method:"POST"}); refresh(); }
+
+async function finish(){
+  if(!confirm("Clear this video (script, images, video, metadata, thumbnail) and stop the studio? Your YouTube login is kept.")) return;
+  try{ await fetch("/api/finish",{method:"POST"}); }catch{}
+  document.querySelector(".wrap").querySelectorAll(".step").forEach(s=>s.style.display="none");
+  $("#finished").style.display="block";
+}
+
+async function uploadThumb(){
+  const f = $("#thumb-file").files[0];
+  if(!f) return alert("Choose an image first.");
+  await fetch("/api/thumbnail",{method:"POST",headers:{"Content-Type":f.type||"application/octet-stream"},body:f});
+  refresh(); showThumb();
+}
+
+// ── docs ──
+async function loadDoc(name){
+  const t = await fetch("/api/file/"+name).then(r=>r.ok?r.text():"");
+  const el = $("#doc-"+name); if(el) el.textContent = t;
+}
+function toggleDoc(name){ const o=$("#out-"+name); o.classList.toggle("show"); if(o.classList.contains("show")) loadDoc(name); }
+
+function showVideo(){ const o=$("#out-video"); o.className="out show"; o.innerHTML='<video controls src="/api/video?t='+Date.now()+'"></video>'; }
+function showThumb(){ $("#thumb-prev").innerHTML='<img class="thumb" src="/api/thumbnail?t='+Date.now()+'">'; }
+function showUploadUrl(logs){
+  const m = logs.match(/https:\/\/youtu\.be\/[\w-]+/);
+  if(m){ const o=$("#out-publish"); o.className="out show"; o.innerHTML='✓ Uploaded: <a href="'+m[0]+'" target="_blank">'+m[0]+'</a>'; }
+}
+
+// ── topics render ──
+function renderTopics(){
+  const list=$("#topic-list"); list.innerHTML="";
+  (state.topics||[]).forEach(t=>{
+    const d=document.createElement("div");
+    d.className="topic"+(pickedRank===t.rank?" sel":"");
+    d.onclick=()=>{ pickedRank=t.rank; renderTopics(); $("#run-script").disabled=false; };
+    d.innerHTML=`<h3>${t.title}</h3><div class="meta"><span class="pill">${t.pillar}</span> &nbsp;${t.targetEmotion||""}</div><div class="hook">${(t.hook||"").slice(0,180)}…</div>`;
+    list.appendChild(d);
+  });
+}
+
+// ── lock/unlock + badges from state ──
+function lock(id, open){ $("#card-"+id).classList.toggle("lock", !open); }
+function stepDone(id, done){ $("#step-"+id).classList.toggle("done", done); }
+
+function applyState(){
+  // research
+  if(state.research?.ready){ setBadge("b-research","ok","done"); stepDone("research",true); }
+  // topics
+  lock("topics", !!state.research?.ready);
+  renderTopics();
+  if(state.topics?.length){ if($("#b-topics").textContent==="waiting") setBadge("b-topics","idle","pick one"); }
+  // script
+  lock("script", !!state.script?.ready);
+  if(state.script?.ready){ setBadge("b-script","ok","ready"); stepDone("topics",true); stepDone("script",true); }
+  // images
+  lock("images", !!state.prompts?.ready || (state.images?.count||0) > 0);
+  $("#img-count").textContent = state.images?.count ?? 0;
+  if(state.prompts?.ready) setBadge("b-images", state.images?.count>0?"ok":"idle", state.images?.count>0?(state.images.count+" imgs"):"add images");
+  const imgClean = state.images?.cleaned || 0;
+  if(imgClean>0) setBadge("b-image-clean","ok",imgClean+" clean");
+  else setBadge("b-image-clean","idle","not cleaned");
+  $("#image-clean-hint").textContent = imgClean>0 ? (imgClean+" image files cleaned") : "run after Nana Banana 2 images are saved";
+  stepDone("images", (state.images?.count||0) > 0);
+  // video
+  lock("video", (state.images?.count||0) > 0);
+  if(state.video?.ready){ setBadge("b-video","ok","ready"); stepDone("video",true);
+    $("#video-hint").textContent = state.video.name+" · "+state.video.sizeMB+" MB"; }
+  // metadata
+  lock("metadata", !!state.video?.ready);
+  if(state.metadata?.ready){ setBadge("b-metadata","ok","ready"); stepDone("metadata",true); }
+  // thumbnail
+  lock("thumb", !!state.metadata?.ready);
+  if(state.thumbnail?.ready){ setBadge("b-thumb","ok","set"); stepDone("thumb",true); }
+  // publish
+  lock("publish", !!state.video?.ready);
+  $("#auth-hint").textContent = state.auth?.token ? "" : "⚠ run `npm run yt:auth` first";
+  if(!state.auth?.token) $("#run-upload").disabled = true;
+}
+
+async function refresh(){ try{ state = await api("/api/state"); applyState(); }catch(e){} }
+refresh();
+showThumbIfAny();
+function showThumbIfAny(){ fetch("/api/thumbnail").then(r=>{ if(r.ok) showThumb(); }); }
+</script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+{
+  "name": "founder-finance-context",
+  "version": "1.0.0",
+  "description": "Fetches high-impact niche news + competitor videos as context for the Founder Finance content pipeline.",
+  "type": "module",
+  "scripts": {
+    "context": "node src/index.js",
+    "news": "node src/index.js --only=news",
+    "videos": "node src/index.js --only=videos",
+    "trends": "node src/index.js --only=trends",
+    "topics": "node src/topics.js",
+    "script": "node src/script.js",
+    "metadata": "node src/metadata.js",
+    "yt:auth": "node src/youtube-auth.js",
+    "upload": "node src/upload.js",
+    "ui": "node ui/server.js",
+    "resolve": "node src/resolve-channels.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.104.1",
+    "express": "^5.2.1",
+    "googleapis": "^173.0.0"
+  }
+}

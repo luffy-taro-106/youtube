@@ -1,0 +1,21 @@
+{
+  "name": "curiosity-channel-pipeline",
+  "version": "1.0.0",
+  "description": "Idea-first content pipeline for the colored stick-figure curiosity/hidden-science channel.",
+  "type": "module",
+  "scripts": {
+    "script": "node src/script.js",
+    "metadata": "node src/metadata.js",
+    "yt:auth": "node src/youtube-auth.js",
+    "upload": "node src/upload.js",
+    "ui": "node ui/server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.104.1",
+    "express": "^5.2.1",
+    "googleapis": "^173.0.0"
+  }
+}

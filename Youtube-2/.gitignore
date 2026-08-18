@@ -1,0 +1,9 @@
+.env
+.youtube-token.json
+client_secret*.json
+oauth_client.json
+output/
+Images/zapi-img/
+node_modules/
+.DS_Store
+*.mp4

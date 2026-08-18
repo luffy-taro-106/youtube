@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "ui",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "ui"],
+      "port": 4000
+    },
+    {
+      "name": "curiosity-ui",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "Youtube-2", "run", "ui"],
+      "port": 4100
+    }
+  ]
+}

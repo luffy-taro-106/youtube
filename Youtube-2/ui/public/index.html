@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Curiosity Studio</title>
+<style>
+  :root {
+    --bg:#0d1322; --panel:#141b2e; --card:#18203a; --line:#27314f;
+    --text:#eaf0ff; --muted:#8a96bf; --accent:#ffb84d; --accent2:#f59e2e;
+    --green:#4ade80; --red:#f87171; --amber:#fbbf24; --blue:#60a5fa;
+    --navy:#27406b; --warm:#f5b53d; --ink:#0b1020;
+    --radius:12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:radial-gradient(1200px 600px at 80% -10%, #18213b 0%, var(--bg) 55%);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Inter",sans-serif;font-size:14px;line-height:1.55;min-height:100vh}
+  .wrap{max-width:880px;margin:0 auto;padding:32px 20px 80px}
+  header{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  header h1{font-size:22px;font-weight:800;letter-spacing:-.4px}
+  .swatches{display:flex;gap:5px;margin-left:auto}
+  .swatches i{width:14px;height:14px;border-radius:4px;border:1px solid #0006}
+  .tag{font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;background:#3a2c0a;color:var(--accent)}
+  .sub{color:var(--muted);margin-bottom:26px;font-size:13px}
+
+  .step{position:relative;padding-left:46px;margin-bottom:14px}
+  .step::before{content:attr(data-n);position:absolute;left:0;top:0;width:30px;height:30px;border-radius:50%;
+    background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:700;color:var(--muted)}
+  .step.done::before{background:#14532d;border-color:#14532d;color:var(--green);content:"✓"}
+  .step.active::before{border-color:var(--accent);color:var(--accent)}
+  .step:not(:last-child)::after{content:"";position:absolute;left:15px;top:30px;bottom:-14px;width:1px;background:var(--line)}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px}
+  .card.lock{opacity:.5;pointer-events:none}
+  .card h2{font-size:15px;font-weight:700;margin-bottom:3px;display:flex;align-items:center;gap:8px}
+  .card p.desc{color:var(--muted);font-size:12.5px;margin-bottom:12px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+  button{font:inherit;font-weight:700;font-size:13px;border:none;border-radius:8px;padding:9px 16px;cursor:pointer;
+    background:var(--accent2);color:#1a1203;transition:.15s}
+  button:hover{background:var(--accent)}
+  button:disabled{background:#27314f;color:#5a6488;cursor:not-allowed}
+  button.ghost{background:transparent;border:1px solid var(--line);color:var(--text);font-weight:600}
+  button.ghost:hover{border-color:var(--accent);background:#3a2c0a22}
+  button.sm{padding:6px 11px;font-size:12px}
+  button.danger{background:#7f1d1d;color:#fff}button.danger:hover{background:#b91c1c}
+
+  textarea{width:100%;font:inherit;background:var(--ink);color:var(--text);border:1px solid var(--line);
+    border-radius:8px;padding:11px 13px;resize:vertical;min-height:58px;margin-bottom:11px}
+  textarea:focus{outline:none;border-color:var(--accent)}
+
+  .badge{font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;background:#27314f;color:var(--muted)}
+  .badge.run{background:#42330a;color:var(--amber)} .badge.ok{background:#14532d;color:var(--green)}
+  .badge.err{background:#450a0a;color:var(--red)} .badge.idle{background:#27314f;color:var(--muted)}
+
+  .chip{display:none;margin-top:11px;padding:11px 13px;border:1px dashed var(--line);border-radius:8px;background:#0b1020}
+  .chip.show{display:block}
+  .chip .t{font-weight:700;font-size:13.5px}
+  .chip .s{font-size:11px;color:var(--accent);font-weight:700;margin-top:3px}
+
+  pre.log{background:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-top:11px;
+    font-family:"SF Mono",ui-monospace,monospace;font-size:11px;color:#aeb8e0;max-height:220px;overflow:auto;white-space:pre-wrap;display:none}
+  pre.log.show{display:block}
+  .out{margin-top:12px;display:none}.out.show{display:block}
+  .doc{background:var(--ink);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font-size:12.5px;
+    max-height:360px;overflow:auto;white-space:pre-wrap;font-family:"SF Mono",ui-monospace,monospace;color:#c8d0f0}
+
+  video{width:100%;border-radius:8px;margin-top:12px;background:#000}
+  img.thumb{max-width:320px;border-radius:8px;margin-top:10px;border:1px solid var(--line)}
+  select{font:inherit;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+  a{color:var(--accent)}
+  code{background:#0b1020;padding:1px 5px;border-radius:5px;font-size:11.5px;color:var(--accent)}
+  .hint{font-size:11.5px;color:var(--muted)}
+  .count{font-weight:800;color:var(--text)}
+  input[type=file]{font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Curiosity Studio</h1><span class="tag">idea → published</span>
+    <span class="swatches" title="navy=night · white=explain · black=drama · warm=light · red=emphasis">
+      <i style="background:#27406b"></i><i style="background:#f4f4f4"></i><i style="background:#111"></i><i style="background:#f5b53d"></i><i style="background:#ef3a30"></i>
+    </span>
+  </header>
+  <div class="sub">Type one idea. The agent develops it, writes the script, and storyboards it into colored doodle scenes — then you generate images, render, package, and publish. Each step lights up when the one before it is ready.</div>
+
+  <!-- 1 IDEA → SCRIPT -->
+  <div class="step active" data-n="1" id="step-script">
+    <div class="card">
+      <h2>Start a new video <span class="badge idle" id="b-script">idle</span></h2>
+      <p class="desc">Give it one idea — a thing people do every day, a body/ancient/mind mystery. Claude expands it into a brief (title, hook, honest caveats, the closing question), writes the 7–8 min script, and storyboards every scene with a background color.</p>
+      <textarea id="idea" placeholder="e.g. Why can't you remember being a baby?"></textarea>
+      <div class="row">
+        <button id="run-script" onclick="runScript()">Develop &amp; write script</button>
+        <span class="hint">Starting a new idea resets the previous video's files.</span>
+      </div>
+      <div class="chip" id="brief-chip"><div class="t" id="brief-title"></div><div class="s" id="brief-series"></div></div>
+      <pre class="log" id="log-script"></pre>
+      <div class="out" id="out-script"><div class="row" style="margin:6px 0"><button class="ghost sm" onclick="toggleDoc('script')">View / hide script</button></div><div class="doc" id="doc-script" style="display:none"></div></div>
+    </div>
+  </div>
+
+  <!-- 2 IMAGES -->
+  <div class="step" data-n="2" id="step-images">
+    <div class="card lock" id="card-images">
+      <h2>Generate images <span class="badge idle" id="b-images">waiting</span><span class="badge idle" id="b-image-clean">not cleaned</span></h2>
+      <p class="desc">Open the image-prompt file (each block shows its background color), generate each frame on Google Flow / Gemini / Nano Banana 2, and save them into <code>Images/zapi-img</code> named by scene number (01, 02, …). Then refresh the count.</p>
+      <div class="row">
+        <button class="ghost sm" onclick="toggleDoc('prompts')">View image prompts</button>
+        <button class="ghost sm" id="run-clean-images" onclick="runCleanImages()">Remove image watermark</button>
+        <button class="ghost sm" onclick="clearImages()">Clear images folder</button>
+        <button class="ghost sm" onclick="refresh()">Refresh count</button>
+        <span class="hint"><span class="count" id="img-count">0</span> images detected</span>
+        <span class="hint" id="image-clean-hint"></span>
+      </div>
+      <pre class="log" id="log-clean-images"></pre>
+      <div class="out" id="out-prompts"><div class="doc" id="doc-prompts"></div></div>
+    </div>
+  </div>
+
+  <!-- 3 VIDEO -->
+  <div class="step" data-n="3" id="step-video">
+    <div class="card lock" id="card-video">
+      <h2>Make the video <span class="badge idle" id="b-video">waiting</span></h2>
+      <p class="desc">Synthesizes the voiceover (Kokoro), animates each image with Ken Burns + captions, appends an outro if present, and stitches the final cut. Takes a few minutes the first time.</p>
+      <div class="row">
+        <button id="run-video" onclick="runVideo()">Generate video</button>
+        <span class="hint" id="video-hint"></span>
+      </div>
+      <pre class="log" id="log-video"></pre>
+      <div class="out" id="out-video"></div>
+    </div>
+  </div>
+
+  <!-- 4 METADATA -->
+  <div class="step" data-n="4" id="step-metadata">
+    <div class="card lock" id="card-metadata">
+      <h2>Metadata &amp; thumbnail prompts <span class="badge idle" id="b-metadata">waiting</span></h2>
+      <p class="desc">Claude writes the SEO title/description/tags/chapters and 3 concrete, on-brand thumbnail prompts for Gemini.</p>
+      <div class="row">
+        <button id="run-metadata" onclick="runMetadata()">Generate metadata</button>
+        <button class="ghost sm" onclick="toggleDoc('metadata')">View metadata</button>
+        <button class="ghost sm" onclick="toggleDoc('thumbs')">View thumbnail prompts</button>
+      </div>
+      <pre class="log" id="log-metadata"></pre>
+      <div class="out" id="out-metadata"><div class="doc" id="doc-metadata"></div></div>
+      <div class="out" id="out-thumbs"><div class="doc" id="doc-thumbs"></div></div>
+    </div>
+  </div>
+
+  <!-- 5 THUMBNAIL -->
+  <div class="step" data-n="5" id="step-thumb">
+    <div class="card lock" id="card-thumb">
+      <h2>Upload thumbnail <span class="badge idle" id="b-thumb">waiting</span></h2>
+      <p class="desc">Generate the thumbnail on Gemini using a prompt above, then upload the image here.</p>
+      <div class="row">
+        <input type="file" id="thumb-file" accept="image/*" />
+        <button class="sm" onclick="uploadThumb()">Upload thumbnail</button>
+      </div>
+      <div id="thumb-prev"></div>
+    </div>
+  </div>
+
+  <!-- 6 PUBLISH -->
+  <div class="step" data-n="6" id="step-publish">
+    <div class="card lock" id="card-publish">
+      <h2>Publish to YouTube <span class="badge idle" id="b-publish">waiting</span></h2>
+      <p class="desc">Uploads the video with the generated metadata + thumbnail. Defaults to private.</p>
+      <div class="row">
+        <select id="privacy">
+          <option value="private">Private</option>
+          <option value="unlisted">Unlisted</option>
+          <option value="public">Public</option>
+        </select>
+        <button id="run-upload" onclick="runUpload()">Upload to YouTube</button>
+        <span class="hint" id="auth-hint"></span>
+      </div>
+      <pre class="log" id="log-publish"></pre>
+      <div class="out" id="out-publish"></div>
+    </div>
+  </div>
+
+  <!-- FINISH -->
+  <div style="margin-top:26px;padding-top:22px;border-top:1px solid var(--line);display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <button class="danger" onclick="finish()">Finish &amp; clear for next video</button>
+    <span class="hint">Wipes this video's files (script, images, video, metadata, thumbnail) to free storage, keeps your login, and stops the studio.</span>
+  </div>
+  <div id="finished" style="display:none;margin-top:18px;font-size:15px">✓ Cleared. The studio has stopped — run <code>./scripts/ui.sh start</code> to begin the next video.</div>
+</div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+let state = {};
+
+const setBadge = (id, kind, txt) => { const b=$("#"+id); b.className="badge "+kind; b.textContent=txt; };
+async function api(path, opts) { const r = await fetch(path, opts); return r.ok ? r.json() : Promise.reject(await r.text().catch(()=>r.status)); }
+
+// Poll a job, stream logs into logEl, run onDone when finished.
+async function poll(jobId, logEl, badgeId, onDone) {
+  logEl.classList.add("show");
+  setBadge(badgeId, "run", "running…");
+  const tick = async () => {
+    let j; try { j = await api("/api/job/"+jobId); } catch { return; }
+    logEl.textContent = j.logs.trim(); logEl.scrollTop = logEl.scrollHeight;
+    if (j.status === "running") return setTimeout(tick, 1000);
+    if (j.status === "done") { setBadge(badgeId,"ok","done"); onDone && onDone(true); }
+    else { setBadge(badgeId,"err","error"); onDone && onDone(false); }
+    refresh();
+  };
+  tick();
+}
+
+// ── actions ──
+async function runScript(){
+  const idea = $("#idea").value.trim();
+  if(!idea) return alert("Type an idea first.");
+  $("#run-script").disabled = true;
+  let r; try { r = await api("/api/run/script",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({idea})}); }
+  catch(e){ $("#run-script").disabled=false; return alert("Failed to start: "+e); }
+  poll(r.jobId, $("#log-script"), "b-script", (ok)=>{ $("#run-script").disabled=false; if(ok){ loadDoc("script"); $("#out-script").classList.add("show"); } });
+}
+async function runVideo(){
+  $("#run-video").disabled = true;
+  const {jobId} = await api("/api/run/video",{method:"POST"});
+  poll(jobId, $("#log-video"), "b-video", (ok)=>{ $("#run-video").disabled=false; if(ok) showVideo(); });
+}
+async function runCleanImages(){
+  $("#run-clean-images").disabled = true;
+  const {jobId} = await api("/api/run/clean-images",{method:"POST"});
+  poll(jobId, $("#log-clean-images"), "b-image-clean", ()=>{ $("#run-clean-images").disabled=false; });
+}
+async function runMetadata(){
+  $("#run-metadata").disabled = true;
+  const {jobId} = await api("/api/run/metadata",{method:"POST"});
+  poll(jobId, $("#log-metadata"), "b-metadata", ()=>{ $("#run-metadata").disabled=false; loadDoc("metadata"); loadDoc("thumbs"); });
+}
+async function runUpload(){
+  $("#run-upload").disabled = true;
+  const privacy = $("#privacy").value;
+  const {jobId} = await api("/api/run/upload",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({privacy})});
+  poll(jobId, $("#log-publish"), "b-publish", (ok)=>{ $("#run-upload").disabled=false; if(ok) showUploadUrl($("#log-publish").textContent); });
+}
+async function clearImages(){ await api("/api/images/clear",{method:"POST"}); refresh(); }
+
+async function finish(){
+  if(!confirm("Clear this video (script, images, video, metadata, thumbnail) and stop the studio? Your YouTube login is kept.")) return;
+  try{ await fetch("/api/finish",{method:"POST"}); }catch{}
+  document.querySelectorAll(".step").forEach(s=>s.style.display="none");
+  $("#finished").style.display="block";
+}
+
+async function uploadThumb(){
+  const f = $("#thumb-file").files[0];
+  if(!f) return alert("Choose an image first.");
+  await fetch("/api/thumbnail",{method:"POST",headers:{"Content-Type":f.type||"application/octet-stream"},body:f});
+  refresh(); showThumb();
+}
+
+// ── docs ──
+async function loadDoc(name){
+  const t = await fetch("/api/file/"+name).then(r=>r.ok?r.text():"");
+  const el = $("#doc-"+name); if(el) el.textContent = t;
+}
+function toggleDoc(name){
+  if(name==="script"){ const d=$("#doc-script"); d.style.display = d.style.display==="none"?"block":"none"; if(d.style.display==="block") loadDoc("script"); return; }
+  const o=$("#out-"+name); o.classList.toggle("show"); if(o.classList.contains("show")) loadDoc(name);
+}
+
+function showVideo(){ const o=$("#out-video"); o.className="out show"; o.innerHTML='<video controls src="/api/video?t='+Date.now()+'"></video>'; }
+function showThumb(){ $("#thumb-prev").innerHTML='<img class="thumb" src="/api/thumbnail?t='+Date.now()+'">'; }
+function showUploadUrl(logs){
+  const m = logs.match(/https:\/\/youtu\.be\/[\w-]+/);
+  if(m){ const o=$("#out-publish"); o.className="out show"; o.innerHTML='✓ Uploaded: <a href="'+m[0]+'" target="_blank">'+m[0]+'</a>'; }
+}
+
+// ── lock/unlock + badges from state ──
+function lock(id, open){ $("#card-"+id).classList.toggle("lock", !open); }
+function stepDone(id, done){ $("#step-"+id).classList.toggle("done", done); }
+
+function applyState(){
+  // brief chip + script
+  const m = state.meta || {};
+  if(state.script?.ready){
+    setBadge("b-script","ok","ready"); stepDone("script",true);
+    $("#out-script").classList.add("show");
+    if(m.title){ $("#brief-chip").classList.add("show"); $("#brief-title").textContent = m.title; $("#brief-series").textContent = m.series ? ("series · "+m.series) : ""; }
+    if($("#idea").value.trim()==="" && m.idea) $("#idea").value = m.idea;
+  }
+  // images
+  lock("images", !!state.prompts?.ready || (state.images?.count||0) > 0);
+  $("#img-count").textContent = state.images?.count ?? 0;
+  if(state.prompts?.ready) setBadge("b-images", state.images?.count>0?"ok":"idle", state.images?.count>0?(state.images.count+" imgs"):"add images");
+  const imgClean = state.images?.cleaned || 0;
+  if(imgClean>0) setBadge("b-image-clean","ok",imgClean+" clean");
+  else setBadge("b-image-clean","idle","not cleaned");
+  $("#image-clean-hint").textContent = imgClean>0 ? (imgClean+" image files cleaned") : "run after Nana Banana 2 images are saved";
+  stepDone("images", (state.images?.count||0) > 0);
+  // video
+  lock("video", (state.images?.count||0) > 0);
+  if(state.video?.ready){ setBadge("b-video","ok","ready"); stepDone("video",true);
+    $("#video-hint").textContent = state.video.name+" · "+state.video.sizeMB+" MB"; }
+  // metadata
+  lock("metadata", !!state.video?.ready);
+  if(state.metadata?.ready){ setBadge("b-metadata","ok","ready"); stepDone("metadata",true); }
+  // thumbnail
+  lock("thumb", !!state.metadata?.ready);
+  if(state.thumbnail?.ready){ setBadge("b-thumb","ok","set"); stepDone("thumb",true); }
+  // publish
+  lock("publish", !!state.video?.ready);
+  $("#auth-hint").textContent = state.auth?.token ? "" : "⚠ run `npm run yt:auth` first";
+  if(!state.auth?.token) $("#run-upload").disabled = true;
+}
+
+async function refresh(){ try{ state = await api("/api/state"); applyState(); }catch(e){} }
+refresh();
+fetch("/api/thumbnail").then(r=>{ if(r.ok) showThumb(); });
+</script>
+</body>
+</html>
